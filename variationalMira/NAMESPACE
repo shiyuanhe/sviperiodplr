@@ -1,0 +1,4 @@
+exportPattern("^[[:alpha:]]+")
+importFrom(Rcpp, evalCpp)
+useDynLib(variationalMira, .registration = TRUE)
+import(methods,Rcpp)

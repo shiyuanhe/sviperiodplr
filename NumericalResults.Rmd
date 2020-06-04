@@ -1,0 +1,116 @@
+---
+title: "Numerical Results"
+output: html_document
+---
+
+```{r setup, include=FALSE, warning=FALSE, message=FALSE, error=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::read_chunk("./code/simu1/simu1Summary.R")
+knitr::read_chunk("./code/simu1/simu1Example.R")
+knitr::read_chunk("./code/simu1/simu1SVI_plot.R")
+knitr::read_chunk("./code/simu2/simu2Summary.R")
+knitr::read_chunk("./code/realdata/DataAnalysisV2.R")
+```
+
+
+## Simulation I
+
+```{r simu1, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE}
+```
+
+The simulations compare the genealized Lomb-Scarge (GLS) method, multiband GLS (MGLS), the semi-parametric (SP) method, multiband SP (MSP) methods, and the proposed method (SVI). This table shows the recovery rate (RR) in percentage and mean square root error (MSRE) for the considered method.This corresponds to Table 2 in the paper.
+
+| Method | GLS | MGLS | SP | MSP | SVI |
+|--------|--------|--------|--------|--------|--------|
+| RR (%)  | `r rrformat(gls[1])` |  `r rrformat(mgls[1])` |  `r rrformat(sp[1])` |  `r rrformat(msp[1])` |  `r rrformat(svi[1])` |
+| ADE (X 10^4)  | `r maeformat(gls[2])` |  `r maeformat(mgls[2])` |  `r maeformat(sp[2])` |  `r maeformat(msp[2])` |  `r maeformat(svi[2])` |
+
+The next table presents the nominal coverage and the actual coverage 
+This corresponds to Table 3 in the paper.
+
+
+|   | Coverage |  |   |   | 
+|----|--------|---|---|---|
+|Nominal (%) | 90  | 95  | 99 | 99.5 |
+|Actual (%) | `r rrformat(cover90)`|`r rrformat(cover95)`|`r rrformat(cover99)`|`r rrformat(cover995)`|
+
+The following figures reproduce the left column of Figure 6 in the paper.
+
+```{r simu1Example, echo=FALSE, warning=FALSE, message=FALSE}
+```
+
+The following figures reproduce the right column of Figure 6 in the paper.
+
+```{r simu1Plot, echo=FALSE, warning=FALSE, message=FALSE}
+```
+
+## Simulation II
+
+Numerical result for the second simulation. These correspond to Figure S.3 and Figure S.4 in the Supplementary Materials.
+
+```{r prepare, include = FALSE, warnings = FALSE}
+```
+
+
+```{r accuracy, echo=FALSE}
+```
+
+```{r msre, echo=FALSE}
+```
+
+## Real Data Analysis
+
+
+
+
+```{r distInit, include = FALSE, warnings = FALSE}
+```
+
+
+The scatterplot of the sinusoid coefficients for M33 Miras. This corresponds to Figure S.5 in the Supplementary Material.
+```{r betaCorr, echo=FALSE}
+```
+
+
+Compare our estimated period (SVI) with that of Yuan2018 (MSP). This corresponds to Figure S.6 in the Supplementary Material.
+```{r comparePeriod, echo=FALSE}
+```
+
+
+
+Compare our estimated average magnitude with that of Yuan2018 (MSP). These correspond to Figure S.6 in the Supplementary Material.
+```{r compareMagnitude, echo=FALSE}
+```
+
+
+
+The period luminosity relation for the related bands. These correspond to Figure 7 in the paper.
+```{r plotPLR, echo=FALSE}
+```
+
+
+
+```{r distanceMod, echo=FALSE}
+```
+
+The result of the PLR coefficient determination. This is our linear PLR coefficients and their uncertainties in Table 4. They correspond to the row named M33(SVI).
+```{r, echo=FALSE}
+knitr::kable(lPLRmatrix)
+```
+
+The result of the PLR coefficient determination. This is our quadratic PLR coefficients and their uncertainties in Table 4. They correspond to the row named M33(SVI).
+```{r, echo=FALSE}
+knitr::kable(qPLRmatrix)
+```
+
+
+The Distance determination.This is our Distance Modulus in Table 5.
+```{r, echo=FALSE}
+knitr::kable(distModu)
+```
+
+The sigma uncertainty of the above quantity. This is our Distance Modulus uncertainty in Table 5.
+```{r, echo=FALSE}
+knitr::kable(distModuSigma)
+```
+

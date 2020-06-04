@@ -1,0 +1,132 @@
+Note
+=============
+
+- The internal optimization is computed by the [optim](https://github.com/kthohr/optim) library.
+- Include path `/usr/local/optim`.
+
+
+To-do
+===================
+
+The pointers might not be thread safe!!
+
+
+- ~~`cov_ptr` in miraStar should be initialized.~~
+- ~~`Omega_theta` to pointer.~~
+- ~~PL relation is already pointer.~~
+- ~~Remove depends on `BASIS_DOF`, `posteriorMeanMag`~~
+- `hierarchicalPE::get_fit`.
+```
+span colSel = span(1, BASIS_DOF  - 1);
+```
+
+Second group
+
+- `miraStar` class, get fit residuals.
+-  GP training for each band individually. 
+-  ~~Hierarchical, update cov class.~~
+-  ~~Update and record only if typeI==1~~
+-  ~~Initialize cov class in global model.~~
+
+Code Notation
+====================
+
+
+- `xi_` for exact posterior parameters.
+- `eta_` for actual parameters for all $q$.
+- `viU_x` the expectation under $q_x(\cdot)$ for variable $x$, computed from `eta_`.
+- `viS_x` the variance under $q_x(\cdot)$ for variable $x$, computed from `eta_`.
+
+Each band requires at least 3 observation points for computation. Empty band contains one obs with arbitrary values. Set data by `push_data`, the R list should be of the same length, matching the total number of bands.
+
+```
+inline bool notEnoughBandSample(size_t sampleSize){
+    return (sampleSize < 3);
+}
+```
+
+Unit Testing
+=================
+
+- Test parameter estimation for individual class.
+- At true frequency, test period fitting.
+- Test period estimation for a single mira. 
+- Test Optimization for the Outlier Model
+- Test Model Selection. 
+
+
+Covariance Class
+===================
+
+
+- Coef `covBeta`, the first position for nugget. `exp(covBeta(0))`.
+- Update `beta` should be independent of set setting. The update cann only occur outside local updating. 
+
+Options: 
+
+- `set_globalCov`: Pointer setting inside C.
+- `Rset_globalCov`: Setting from R.
+- Type 0, pcaKernel, default. Type 1, squared exponential kernel.
+
+### Squared Exponential Class
+
+We need to minimize the expected value of the minus log-likelihood
+
+Firstly, sample $f$ from $q(f_i)$, compute the expectation.
+$$
+E_{q(\theta | f)} E_{q(\gamma)} E_{q(\Omega)}E_{q(\alpha)} (l_i\times  p(\theta_i))
+$$
+
+Inside the expecation is the log-likelihood
+$$
+y_{ib}^T \Sigma_{ib}^{-1} 
+C_{ib}\theta_{ib} -\frac{1}{2} \theta_{ib}^T C_{ib}^T\Sigma_{ib}^{-1}C_{ib}\theta_{ib} - \frac{1}{2} \log\det \Sigma_{ib}
+$$
+
+The required first order derivative is
+$$
+\begin{align}
+\ -&\langle \frac{\partial \Sigma_{ib} }{\partial t},\ 
+\Sigma_{ib}^{-1}C_{ib}\theta_{ib}y_{ib}^T\Sigma_{ib}^{-1}\rangle +0.5\times \langle \frac{\partial \Sigma_{ib} }{\partial t},\ 
+\Sigma_{ib}^{-1}C_{ib}\theta_{ib}\theta_{ib}^TC_{ib}^T\Sigma_{ib}^{-1}\rangle \\
+&\qquad - 0.5\times\langle \frac{\partial \Sigma_{ib} }{\partial t},\  \Sigma_{ib}^{-1}\rangle 
+\end{align}
+$$
+This is the ascending direction for the ELBO.
+
+The covariance matrix is
+$$\Sigma_{ib} = e^{\beta_0}I_{n_{ib}}+ 
+\text{diag}(\sigma^2_{ib1},\cdots, \sigma^2_{ibn_{ib} })+K$$
+and `Kmat` is
+$$
+K = \begin{pmatrix}
+e^{\beta_1} \exp\left(-\frac{d_{pq}^2}{\exp(\beta_2)}\right)
+\end{pmatrix}_{n_{ib}\times n_{ib}}
+$$
+
+
+As a result
+
+$$
+\frac{\partial \Sigma_{ib} }{\partial \beta_0} =  e^{\beta_0}I_{n_{ib}}
+$$
+
+and 
+
+$$
+\frac{\partial \Sigma_{ib} }{\partial \beta_1} =  \begin{pmatrix}
+e^{\beta_1} \exp\left(-\frac{d_{pq}^2}{\exp(\beta_2)}\right)
+\end{pmatrix}_{n_{ib}\times n_{ib}}
+$$
+
+and 
+
+$$
+\frac{\partial \Sigma_{ib} }{\partial \beta_2} =  \begin{pmatrix}
+e^{\beta_1} \exp\left(
+- e^{-\beta_2} d_{pq}^2\right) \times ( e^{-\beta_2} d_{pq}^2)
+\end{pmatrix}_{n_{ib}\times n_{ib}}
+$$
+
+
+
